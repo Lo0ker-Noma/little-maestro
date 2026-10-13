@@ -12,7 +12,8 @@ Aventura de piano para niños. Funciona en el navegador, en un solo archivo HTML
 
 No la abras como archivo descargado (`file://`): el navegador bloquea el micrófono.
 
-- **GitHub Pages:** la dirección pública de este repositorio.
+- **En el navegador:** [https://lo0ker-noma.github.io/little-maestro/](https://lo0ker-noma.github.io/little-maestro/)  
+  Si esa dirección aún no abre, en el repositorio entra en **Settings → Pages → Build and deployment → Deploy from a branch → `main` → `/ (root)` → Save**. En uno o dos minutos queda pública. El micrófono solo funciona en HTTPS, no abriendo el archivo descargado.
 - **En tu ordenador:** sirve la carpeta con cualquier servidor estático y entra por `http://localhost`.
 
 Chrome, Edge o Safari. En el iPad, usa **Safari**.
