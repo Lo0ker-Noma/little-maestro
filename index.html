@@ -3948,6 +3948,7 @@
     .input-mode-modal { max-width: 560px; }
     .input-mode-choices { flex-wrap: wrap; }
     .input-mode-btn { flex: 1 1 130px; min-width: 0; }
+    #screen-login .login-wrap { padding-bottom: 120px; }
     @media (max-width: 860px) {
       .hdr-logo-text, .hdr-student-name, .hdr-stat { display: none; }
       #global-header { padding: 0 8px; }
@@ -21496,21 +21497,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // ── Volume ────────────────────────────────────────────────
-      SettingsScreen._setVol = function(val) {
+      const api = {};
+      api._setVol = function(val) {
         const v = parseFloat(val);
         AudioEngine.setVolume(v);
         _saveSetting('masterVolume', v);
       };
 
       // ── Option buttons (grouped) ──────────────────────────────
-      SettingsScreen._setOpt = function(key, value, btn, groupClass) {
+      api._setOpt = function(key, value, btn, groupClass) {
         _saveSetting(key, value);
         const group = btn.closest('.settings-opts');
         if (group) group.querySelectorAll('.settings-opt').forEach(b => b.classList.toggle('opt--on', b === btn));
       };
 
       // ── Toggle ────────────────────────────────────────────────
-      SettingsScreen._toggle = function(key, togId) {
+      api._toggle = function(key, togId) {
         const s      = _getSettings();
         const newVal = !(s[key] !== false); // default true except lightMode
         _saveSetting(key, newVal);
@@ -21519,7 +21521,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // ── Theme toggle ──────────────────────────────────────────
-      SettingsScreen._toggleTheme = function() {
+      api._toggleTheme = function() {
         const s        = _getSettings();
         const newLight = !s.lightMode;
         _saveSetting('lightMode', newLight);
@@ -21529,7 +21531,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // ── MIDI panel toggle ─────────────────────────────────────
-      SettingsScreen._toggleMidiPanel = function() {
+      api._toggleMidiPanel = function() {
         const panel = document.getElementById('midi-test-panel');
         if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
       };
@@ -21546,7 +21548,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? '⚠️ MIDI not supported in this browser'
             : '❌ No piano connected';
       }
-      SettingsScreen._updateMidiStatus = _updateMidiStatus;
+      api._updateMidiStatus = _updateMidiStatus;
 
       // ── Live MIDI log ─────────────────────────────────────────
       let _midiLogLines = [];
@@ -21576,7 +21578,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) {}
       }
 
-      return { render, applyOnLoad };
+      return Object.assign({ render, applyOnLoad }, api);
     })();
 
 
@@ -22007,9 +22009,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="freeplay-melody-corner" id="fp-melody-corner"></div>`;
 
-        // Re-mount keyboard
+        // Re-mount keyboard (PianoKeyboard exposes render, not mount)
         if (typeof PianoKeyboard !== 'undefined') {
-          PianoKeyboard.mount('freeplay-keyboard');
+          if (typeof PianoKeyboard.mount === 'function') PianoKeyboard.mount('freeplay-keyboard');
+          else PianoKeyboard.render('freeplay-keyboard', { large: true });
         }
 
         // Mount Melody in corner
@@ -22043,7 +22046,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) el.classList.remove('timer--ending');
         Melody.speak('One more minute! 🎵', 1500);
       }
-      FreePlayManager.extend = extend;
 
       function _end() {
         clearInterval(_timerInterval);
@@ -22173,7 +22175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fpLayout && !document.getElementById('fp-timer')) {
         // Ensure keyboard is mounted (Phase 6 mounts it; this is fallback)
         const fpKbd = document.getElementById('freeplay-keyboard');
-        if (fpKbd && typeof PianoKeyboard !== 'undefined') {
+        if (fpKbd && typeof PianoKeyboard !== 'undefined' && typeof PianoKeyboard.mount === 'function') {
           PianoKeyboard.mount('freeplay-keyboard');
         }
       }
@@ -22229,7 +22231,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./_assets/sw.js', { scope: './' })
+        navigator.serviceWorker.register('./_assets/sw.js')
           .then(reg => console.log('[SW] Registered:', reg.scope))
           .catch(err => console.warn('[SW] Registration failed:', err));
       });
